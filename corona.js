@@ -1,7 +1,7 @@
-const variable = "current"
+const variable = "current";
 
 const variables = {
-  current: "Aktuell erkrankte",
+  current: "Aktuell Erkrankte",
   cases: "Bestätigte Fälle",
   recovered: "Gesundete",
   dead: "Todesfälle"
@@ -10,7 +10,7 @@ const variables = {
 //------------------------1. PREPARATION-------------------------//
 //-----------------------------SVG-------------------------------//
 const width = 960;
-const height = 500;
+const height = 400;
 const margin = 5;
 const padding = 5;
 const adj = 30;
@@ -200,12 +200,9 @@ dataset.then(function(data) {
     })
     .attr("class", function(d) {
       g = d.value.area.split(" ")[1];
-      console.log(g);
       return "gebietelabel " + g;
     })
     .attr("transform", function(d) {
-      console.log(d.value.date);
-      console.log(d.value[variable]);
       return "translate(" + (xScale(d.value.date) + 5) +
         "," + (yScale(d.value[variable]) + 5) + ")";
     })
