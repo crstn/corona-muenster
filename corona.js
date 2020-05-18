@@ -36,18 +36,57 @@ const dataset = d3.csv("https://raw.githubusercontent.com/od-ms/resources/master
       date: timeConv(d["Datum"]),
       cases: +d["Bestätigte Faelle"],
       recovered: +d["Gesundete"],
-      dead: +d["Todesfaelle"],
-      current: (d["Gesundete"] ? +d["Bestätigte Faelle"] - (+d["Gesundete"] + +d["Todesfaelle"]) : null)
+      dead: +d["Todesfaelle"] //,
+      //current: (d["Gesundete"] ? +d["Bestätigte Faelle"] - (+d["Gesundete"] + +d["Todesfaelle"]) : null)
     };
   });
 
 dataset.then(function(data) {
 
+  // turn the tabular into hierarchical data, organized by area
   const slices = d3.nest()
     .key(function(d) {
       return d["area"];
     })
     .entries(data);
+
+  // for missing data, assume the data from the previous day:
+  const tf = d3.timeFormat('%d.%m.');
+
+  // next, we'll sort the data b time stamp in ascending order
+  // and add data about recovered and dead to the days where this
+  // data is missing, assuming the number has not changed since the
+  // previous day.
+
+  // I'm sure there must be a more elegant way to do this, but here we go...
+
+  // loop through areas
+  for (i in slices) {
+
+    // sort data points for this area ascendingly by date
+    slices[i]["values"] = slices[i]["values"].slice().sort((a, b) => d3.ascending(a.date, b.date));
+
+    // handle the first one separately
+    // at the first data point, the current cases are equal to the total cases
+    slices[i]["values"][0].current = slices[i]["values"][0].cases;
+
+    for (var j = 1; j < slices[i]["values"].length; j++) {
+      if (slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
+        slices[i]["values"][j].recovered = slices[i]["values"][j - 1].recovered;
+      }
+
+      if (slices[i]["values"][j].dead == 0 && slices[i]["values"][j - 1].dead > 0) {
+        slices[i]["values"][j].dead = slices[i]["values"][j - 1].dead;
+      }
+
+      slices[i]["values"][j].current = slices[i]["values"][j].cases - (slices[i]["values"][j].recovered + slices[i]["values"][j].dead);
+
+    }
+  }
+
+  console.log(slices);
+
+
 
   //----------------------------SCALES-----------------------------//
 
@@ -66,11 +105,9 @@ dataset.then(function(data) {
   //-----------------------------AXES------------------------------//
 
   const yaxis = d3.axisLeft()
-    //.ticks((slices[0].values).length)
     .scale(yScale);
 
   const xaxis = d3.axisBottom()
-    //.ticks(d3.timeDay.every(10))
     .tickFormat(d3.timeFormat('%d.%m.'))
     .scale(xScale);
 
@@ -158,15 +195,17 @@ dataset.then(function(data) {
     .datum(function(d) {
       return {
         id: d.key,
-        value: d.values[0]
+        value: d.values[d.values.length-1]
       };
     })
     .attr("class", function(d) {
       g = d.value.area.split(" ")[1];
+      console.log(g);
       return "gebietelabel " + g;
     })
     .attr("transform", function(d) {
-
+      console.log(d.value.date);
+      console.log(d.value[variable]);
       return "translate(" + (xScale(d.value.date) + 5) +
         "," + (yScale(d.value[variable]) + 5) + ")";
     })
