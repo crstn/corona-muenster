@@ -1,0 +1,59 @@
+body{
+  padding: 20px
+}
+
+/* AXES */
+/* ticks */
+.axis line {
+  stroke: #706f6f;
+  stroke-width: 0.5;
+  shape-rendering: crispEdges;
+}
+
+/* axis contour */
+.axis path {
+  stroke: #706f6f;
+  stroke-width: 0.7;
+  shape-rendering: crispEdges;
+}
+
+/* axis text */
+.axis text {
+  fill: #2b2929;
+  font-family: Arial;
+  font-size: 120%;
+}
+
+/* LINE CHART */
+path {
+  fill: none;
+  stroke: #ed3700;
+}
+
+path.ms {
+  stroke: #ed3700;
+  stroke-width: 2;
+}
+
+path.bg {
+  stroke: lightgrey;
+  stroke-opacity: 0.0;
+  stroke-width: 10;
+}
+
+path.andere {
+  stroke: #2b2929;
+  stroke-dasharray: 2;
+}
+
+.gebietelabel {
+  fill: #2b2929;
+  font-family: Arial;
+  font-size: 80%;
+  display: none;
+}
+
+.Münster {
+  font-weight: bold;
+  display: block;
+}
