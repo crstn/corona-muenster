@@ -100,8 +100,8 @@ dataset.then(function(data) {
   const line = d3.line()
     .y(function(d) {
       return yScale(d[variable]);
-    })//.defined(function(d) { // Omit empty values.
-      //return d[variable]  !== null;
+    }) //.defined(function(d) { // Omit empty values.
+    //return d[variable]  !== null;
     //})
     .x(function(d) {
       return xScale(d.date);
@@ -115,9 +115,9 @@ dataset.then(function(data) {
 
   backgrounds.append("path")
     .attr("class", "bg")
-    .attr("id", function(d){
+    .attr("id", function(d) {
       return d.key.split(" ")[1];
-     })
+    })
     .attr("d", function(d) {
       return line(d.values);
     })
