@@ -7,8 +7,30 @@ const variables = {
   dead: "Todesfälle"
 }
 
-var dateextent;  // will store the range of dates covered
+// add variable selection
+selecta = d3.select("div#selecta")
+            .append("select")
+            .attr("id", "var");
+
+for (key in variables){
+   selecta.append("option")
+         .attr("value", key)
+         .text(variables[key]);
+}
+
+selecta.on('change', function() {
+    update(d3.select(this).property('value'));
+});
+
+var transitiontime = 0;
+
+var dateextent; // will store the range of dates covered
 var coronadata; // will store all our data by area
+
+var xScale;
+var yScale;
+var xaxis;
+var yaxis;
 
 //------------------------1. PREPARATION-------------------------//
 //-----------------------------SVG-------------------------------//
@@ -87,54 +109,66 @@ dataset.then(function(data) {
     }
   }
 
-  console.log(slices);
-
   dateextent = d3.extent(data, function(d) {
     return d.date
   })
 
   coronadata = slices;
 
-  update(variable);
+  // initialize scales
 
-
-});
-
-
-function update(variable) {
-
-
-  //----------------------------SCALES-----------------------------//
-
-  const xScale = d3.scaleTime()
+  xScale = d3.scaleTime()
     .domain(dateextent).range([0, width - 80]); // leave 80px space for labels
 
-  const yScale = d3.scaleLinear()
-    .domain([(0), d3.max(coronadata, function(c) {
-      return d3.max(c.values, function(d) {
-        return d[variable];
-      });
-    })]).rangeRound([height, 0]);
+  // domain of the yScale will be updated dynamically!
+  yScale = d3.scaleLinear()
+    .rangeRound([height, 0]);
 
   //-----------------------------AXES------------------------------//
 
-  const yaxis = d3.axisLeft()
+  yaxis = d3.axisLeft()
     .scale(yScale);
+  svg.append("g")
+    .attr("class", "myYaxis axis");
 
-  const xaxis = d3.axisBottom()
+  xaxis = d3.axisBottom()
     .tickFormat(d3.timeFormat('%d.%m.'))
     .scale(xScale);
 
-
-  //-------------------------2. DRAWING----------------------------//
-
+  // x axis doesn't change
   svg.append("g")
     .attr("class", "axis")
     .attr("transform", "translate(0," + height + ")")
     .call(xaxis);
 
+
+  update(variable);
+
+
+});
+
+// this is where the action is...
+function update(variable) {
+
+  // update the domain for y scale
+  yScale.domain([(0), d3.max(coronadata, function(c) {
+    return d3.max(c.values, function(d) {
+      return d[variable];
+    });
+  })])
+
+  // update the y Axis
+  svg.selectAll(".myYaxis")
+    .transition()
+    .duration(transitiontime)
+    .call(yaxis);
+
+
+  // label the y-axis with the current variable
+  d3.select(".yaxislabel").remove();
+
   svg.append("g")
-    .attr("class", "axis")
+    .attr("class", "axis yaxislabel")
     .call(yaxis)
     .append("text")
     .attr("transform", "rotate(-90)")
@@ -144,35 +178,36 @@ function update(variable) {
     .text(variables[variable]);
 
 
-  //-----------------------------AXES------------------------------//
-
-  //----------------------------LINES------------------------------//
+  // upade the lines
 
   const line = d3.line()
-    .y(function(d) {
-      return yScale(d[variable]);
-    }) //.defined(function(d) { // Omit empty values.
-    //return d[variable]  !== null;
-    //})
     .x(function(d) {
       return xScale(d.date);
+    })
+    .y(function(d) {
+      return yScale(d[variable]);
     });
 
 
-  const backgrounds = svg.selectAll(".bg")
-    .data(coronadata)
-    .enter()
-    .append("g");
+  var backgrounds = svg.selectAll(".bg")
+    .data(coronadata);
 
-  backgrounds.append("path")
+  backgrounds.enter()
+    .append("path")
+    .merge(backgrounds)
+    .transition()
+    .duration(transitiontime)
     .attr("class", "bg")
     .attr("id", function(d) {
       return d.key.split(" ")[1];
     })
     .attr("d", function(d) {
       return line(d.values);
-    })
-    .on("mouseenter", function(d) {
+    });
+
+  svg.selectAll(".bg")
+  .on("mouseenter", function(d) {
+    console.log("enter");
       g = d.key.split(" ")[1];
       d3.select(".Münster").attr("style", "display: none");
       d3.select("." + g).attr("style", "display: block");
@@ -185,12 +220,14 @@ function update(variable) {
       d3.select("path.bg#" + g).attr("style", "stroke-opacity: 0.0");
     });
 
-  const lines = svg.selectAll(".dataline")
-    .data(coronadata)
-    .enter()
-    .append("g");
+  var lines = svg.selectAll(".dataline")
+    .data(coronadata);
 
-  lines.append("path")
+  lines.enter()
+    .append("path")
+    .merge(lines)
+    .transition()
+    .duration(transitiontime)
     .attr("class", function(d) {
       if (d.key == "Stadt Münster") {
         return "dataline ms";
@@ -205,24 +242,28 @@ function update(variable) {
 
 
   // add labels to the right
-  lines.append("text")
-    .datum(function(d) {
-      return {
-        id: d.key,
-        value: d.values[d.values.length - 1]
-      };
-    })
+  var labels = svg.selectAll(".gebietelabel")
+    .data(coronadata);
+
+  labels.enter()
+    .append("text")
+    .merge(labels)
+    .transition()
+    .duration(transitiontime)
     .attr("class", function(d) {
-      g = d.value.area.split(" ")[1];
+      g = d.key.split(" ")[1];
       return "gebietelabel " + g;
     })
     .attr("transform", function(d) {
-      return "translate(" + (xScale(d.value.date) + 5) +
-        "," + (yScale(d.value[variable]) + 5) + ")";
+      return "translate(" + (xScale(d.values[d.values.length - 1].date) + 5) +
+        "," + (yScale(d.values[d.values.length - 1][variable]) + 5) + ")";
     })
     //.attr("x", 5)
     .text(function(d) {
-      return d.value.area;
+      return d.key;
     });
+
+  // set the transition time to one second after the inital run
+  transitiontime = 1000
 
 }
