@@ -7,7 +7,8 @@ const variables = {
   dead: "Todesfälle"
 }
 
-var dateextent;
+var dateextent;  // will store the range of dates covered
+var coronadata; // will store all our data by area
 
 //------------------------1. PREPARATION-------------------------//
 //-----------------------------SVG-------------------------------//
@@ -92,13 +93,15 @@ dataset.then(function(data) {
     return d.date
   })
 
-  update(slices, variable, dateextent);
+  coronadata = slices;
+
+  update(variable);
 
 
 });
 
 
-function update(slices, variable, dateextent) {
+function update(variable) {
 
 
   //----------------------------SCALES-----------------------------//
@@ -107,7 +110,7 @@ function update(slices, variable, dateextent) {
     .domain(dateextent).range([0, width - 80]); // leave 80px space for labels
 
   const yScale = d3.scaleLinear()
-    .domain([(0), d3.max(slices, function(c) {
+    .domain([(0), d3.max(coronadata, function(c) {
       return d3.max(c.values, function(d) {
         return d[variable];
       });
@@ -157,7 +160,7 @@ function update(slices, variable, dateextent) {
 
 
   const backgrounds = svg.selectAll(".bg")
-    .data(slices)
+    .data(coronadata)
     .enter()
     .append("g");
 
@@ -183,7 +186,7 @@ function update(slices, variable, dateextent) {
     });
 
   const lines = svg.selectAll(".dataline")
-    .data(slices)
+    .data(coronadata)
     .enter()
     .append("g");
 
