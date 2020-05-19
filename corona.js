@@ -7,6 +7,8 @@ const variables = {
   dead: "Todesfälle"
 }
 
+var dateextent;
+
 //------------------------1. PREPARATION-------------------------//
 //-----------------------------SVG-------------------------------//
 const width = 960;
@@ -86,14 +88,23 @@ dataset.then(function(data) {
 
   console.log(slices);
 
+  dateextent = d3.extent(data, function(d) {
+    return d.date
+  })
+
+  update(slices, variable, dateextent);
+
+
+});
+
+
+function update(slices, variable, dateextent) {
 
 
   //----------------------------SCALES-----------------------------//
 
   const xScale = d3.scaleTime()
-    .domain(d3.extent(data, function(d) {
-      return d.date
-    })).range([0, width - 80]); // leave 80px space for labels
+    .domain(dateextent).range([0, width - 80]); // leave 80px space for labels
 
   const yScale = d3.scaleLinear()
     .domain([(0), d3.max(slices, function(c) {
@@ -195,7 +206,7 @@ dataset.then(function(data) {
     .datum(function(d) {
       return {
         id: d.key,
-        value: d.values[d.values.length-1]
+        value: d.values[d.values.length - 1]
       };
     })
     .attr("class", function(d) {
@@ -210,4 +221,5 @@ dataset.then(function(data) {
     .text(function(d) {
       return d.value.area;
     });
-});
+
+}
