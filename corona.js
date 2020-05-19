@@ -164,20 +164,6 @@ function update(variable) {
     .call(yaxis);
 
 
-  // label the y-axis with the current variable
-  d3.select(".yaxislabel").remove();
-
-  svg.append("g")
-    .attr("class", "axis yaxislabel")
-    .call(yaxis)
-    .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("dy", ".75em")
-    .attr("y", 6)
-    .style("text-anchor", "end")
-    .text(variables[variable]);
-
-
   // upade the lines
 
   const line = d3.line()
