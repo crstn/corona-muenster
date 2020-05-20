@@ -70,25 +70,6 @@ d3.selectAll(".varselecta")
   });
 
 
-// var options = d3.select("select#var")
-//                 .selectAll("span")
-//                 .data(test)
-//                 .enter()
-//                 .append("option")
-//                 .attr("class", function(d){
-//                   return "langswitch "+d.lang;
-//                 })
-//                 .attr("value", function(d){
-//                   return d.variable;
-//                 })
-//                 .text(function(d){ return d.label; });
-//
-//
-// d3.select("select#var")
-//   .on('change', function() {
-//     update(d3.select(this).property('value'));
-// });
-
 var transitiontime = 0;
 
 var dateextent; // will store the range of dates covered
@@ -99,8 +80,7 @@ var yScale;
 var xaxis;
 var yaxis;
 
-//------------------------1. PREPARATION-------------------------//
-//-----------------------------SVG-------------------------------//
+// SVG setup
 const width = 960;
 const height = 400;
 const margin = 5;
@@ -128,8 +108,7 @@ const dataset = d3.csv("https://raw.githubusercontent.com/od-ms/resources/master
       date: timeConv(d["Datum"]),
       cases: +d["Bestätigte Faelle"],
       recovered: +d["Gesundete"],
-      dead: +d["Todesfaelle"] //,
-      //current: (d["Gesundete"] ? +d["Bestätigte Faelle"] - (+d["Gesundete"] + +d["Todesfaelle"]) : null)
+      dead: +d["Todesfaelle"]
     };
   });
 
