@@ -1,48 +1,6 @@
 const variable = "current";
 const language = "DE"
 
-const test = [
-  { variable: "current",
-    lang: "DE",
-    label: "Aktuelle Fälle"
-  },
-  {
-    variable: "cases",
-    label: "Fälle gesamt",
-    lang: "DE",
-  },
-  {
-    variable: "recovered",
-    label: "Gesundete",
-    lang: "DE",
-  },
-  {
-    variable: "dead",
-    label: "Todesfälle",
-    lang: "DE",
-  },
-  {
-    variable: "current",
-    lang: "EN",
-    label: "Current cases"
-  },
-  {
-    variable: "cases",
-    lang: "EN",
-    label: "Total cases"
-  },
-  {
-    variable: "recovered",
-    lang: "EN",
-    label: "Recovered"
-  },
-  { variable: "dead",
-    lang: "EN",
-    label: "Deaths"
-  }
-]
-
-
 const variables = {
   current: {
     DE: "Aktuelle Fälle",
@@ -67,43 +25,69 @@ d3.selectAll(".langselecta")
   .on("click", function() {
     newlang = this.id;
 
-    currentVar = d3.select('select#var').property('value');
-    console.log(currentVar);
-
     // swap texts
-    d3.selectAll(".langswitch").attr("style", "display: none");
-    d3.selectAll("." + newlang).attr("style", "display: block");
+    d3.selectAll(".langswitch").classed("hidden", true);
+    d3.selectAll("." + newlang).classed("hidden", false);
     // update language selection indicator at top
     d3.selectAll(".langselecta").classed("selected", false);
     d3.selectAll(".langselecta#" + newlang).classed("selected", true);
-    // variable selection
-    d3.select('#myselect').property('value', currentVar);
 
   });
 
 // add variable selection
-d3.select("div#selecta")
-  .append("select")
-  .attr("id", "var");
+for (v in variables) {
+  s = d3.select("div#selecta");
 
-var options = d3.select("select#var")
-                .selectAll("span")
-                .data(test)
-                .enter()
-                .append("option")
-                .attr("class", function(d){
-                  return "langswitch "+d.lang;
-                })
-                .attr("value", function(d){
-                  return d.variable;
-                })
-                .text(function(d){ return d.label; });
+  s.append("span")
+    .attr("class", "langswitch DE")
+    .append("a")
+    .attr("id", v)
+    .attr("href", "#")
+    .attr("class", "varselecta")
+    .text(variables[v]["DE"]);
+
+  s.append("span")
+    .attr("class", "langswitch EN hidden")
+    .append("a")
+    .attr("id", v)
+    .attr("href", "#")
+    .attr("class", "varselecta")
+    .text(variables[v]["EN"]);
+
+}
+
+// highlight the first shown variable:
+d3.selectAll(".varselecta#" + variable).classed("selected", true);
+
+d3.selectAll(".varselecta")
+  .on("click", function() {
+
+    newvar = this.id;
+    d3.selectAll(".varselecta").classed("selected", false);
+    d3.selectAll(".varselecta#" + newvar).classed("selected", true);
+
+    update(newvar);
+  });
 
 
-d3.select("select#var")
-  .on('change', function() {
-    update(d3.select(this).property('value'));
-});
+// var options = d3.select("select#var")
+//                 .selectAll("span")
+//                 .data(test)
+//                 .enter()
+//                 .append("option")
+//                 .attr("class", function(d){
+//                   return "langswitch "+d.lang;
+//                 })
+//                 .attr("value", function(d){
+//                   return d.variable;
+//                 })
+//                 .text(function(d){ return d.label; });
+//
+//
+// d3.select("select#var")
+//   .on('change', function() {
+//     update(d3.select(this).property('value'));
+// });
 
 var transitiontime = 0;
 

@@ -62,23 +62,26 @@ p.fineprint{
   font-size: 0.8em;
   text-align: right;
   padding-right: 12%;
+  margin-top: -20px;
 }
 
 p.lang{
   font-size: 0.8em;
   text-align: right;
   margin-bottom: -10px;
+  padding-right: 12%;
 }
 
-.EN{
+.hidden{
   display: none;
 }
 
-a.langselecta{
-  padding: 0 2px 0 2px;
+a.langselecta, a.varselecta{
+  padding: 1px 4px 1px 4px;
+  margin-right: 5px;
 }
 
-a.langselecta.selected{
+a.selected{
   background-color: #0366d6;
   color: white;
 }
