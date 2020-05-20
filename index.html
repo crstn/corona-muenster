@@ -12,13 +12,22 @@
 <!-- heavily inspired by http://datawanderings.com/2019/10/28/tutorial-making-a-line-chart-in-d3-js-v-5/ -->
 
 <body>
-  <h1>COVID-19 Fälle in Münster, NRW</h1>
+  <p class="lang">
+    <a href="#" class="langselecta selected" id="DE">DE</a>
+    <a href="#" class="langselecta" id="EN" >EN</a>
+  </p>
 
-  <p>COVID-19 Daten für die Stadt Münster im Vergleich mit den anderen Teilen des <a href="https://www.bezreg-muenster.de/de/wir_ueber_uns/regierungsbezirk/index.html">Regierungsbezirks Münster</a>. </p>
+  <h1 class="langswitch DE">COVID-19 Fälle in Münster, NRW</h1>
+  <h1 class="langswitch EN">COVID-19 Cases in Münster, NRW</h1>
+
+  <p class="langswitch DE">COVID-19 Daten für die Stadt Münster im Vergleich mit den anderen Teilen des <a href="https://www.bezreg-muenster.de/de/wir_ueber_uns/regierungsbezirk/index.html">Regierungsbezirks Münster</a>. </p>
+  <p class="langswitch EN">COVID-19 data for the city of Münster in comparison to the other areas of the <a href="https://www.bezreg-muenster.de/de/wir_ueber_uns/regierungsbezirk/index.html">Münster Region</a>. </p>
 
   <div id="selecta"></div>
   <div id="container" class="svg-container"></div>
 
-  <p class="fineprint">Daten von <a href="https://opendata.stadt-muenster.de/dataset/coronavirus-infektionen-sars-cov-2-im-regierungsbezirk-münster">Open Data Münster</a>, Code von <a href="https://twitter.com/carstenkessler">@carstenkessler</a>.</p>
+  <p class="fineprint langswitch DE">Daten von <a href="https://opendata.stadt-muenster.de/dataset/coronavirus-infektionen-sars-cov-2-im-regierungsbezirk-münster">Open Data Münster</a>, Code von <a href="https://twitter.com/carstenkessler">@carstenkessler</a>.</p>
+  <p class="fineprint langswitch EN">Data from <a href="https://opendata.stadt-muenster.de/dataset/coronavirus-infektionen-sars-cov-2-im-regierungsbezirk-münster">Open Data Münster</a>, Code by <a href="https://twitter.com/carstenkessler">@carstenkessler</a>.</p>
+
   <script type="text/javascript" src="corona.js"></script>
 </body>

@@ -1,24 +1,107 @@
 const variable = "current";
+const language = "DE"
+
+const test = [
+  { variable: "current",
+    lang: "DE",
+    label: "Aktuelle Fälle"
+  },
+  {
+    variable: "cases",
+    label: "Fälle gesamt",
+    lang: "DE",
+  },
+  {
+    variable: "recovered",
+    label: "Gesundete",
+    lang: "DE",
+  },
+  {
+    variable: "dead",
+    label: "Todesfälle",
+    lang: "DE",
+  },
+  {
+    variable: "current",
+    lang: "EN",
+    label: "Current cases"
+  },
+  {
+    variable: "cases",
+    lang: "EN",
+    label: "Total cases"
+  },
+  {
+    variable: "recovered",
+    lang: "EN",
+    label: "Recovered"
+  },
+  { variable: "dead",
+    lang: "EN",
+    label: "Deaths"
+  }
+]
+
 
 const variables = {
-  current: "Aktuell Erkrankte",
-  cases: "Bestätigte Fälle",
-  recovered: "Gesundete",
-  dead: "Todesfälle"
+  current: {
+    DE: "Aktuelle Fälle",
+    EN: "Current cases"
+  },
+  cases: {
+    DE: "Fälle gesamt",
+    EN: "Total cases"
+  },
+  recovered: {
+    DE: "Gesundete",
+    EN: "Recovered"
+  },
+  dead: {
+    DE: "Todesfälle",
+    EN: "Deaths"
+  }
 }
+
+// add language selection
+d3.selectAll(".langselecta")
+  .on("click", function() {
+    newlang = this.id;
+
+    currentVar = d3.select('select#var').property('value');
+    console.log(currentVar);
+
+    // swap texts
+    d3.selectAll(".langswitch").attr("style", "display: none");
+    d3.selectAll("." + newlang).attr("style", "display: block");
+    // update language selection indicator at top
+    d3.selectAll(".langselecta").classed("selected", false);
+    d3.selectAll(".langselecta#" + newlang).classed("selected", true);
+    // variable selection
+    d3.select('#myselect').property('value', currentVar);
+
+  });
 
 // add variable selection
-selecta = d3.select("div#selecta")
-            .append("select")
-            .attr("id", "var");
+d3.select("div#selecta")
+  .append("select")
+  .attr("id", "var");
 
-for (key in variables){
-   selecta.append("option")
-         .attr("value", key)
-         .text(variables[key]);
-}
+var options = d3.select("select#var")
+                .selectAll("span")
+                .data(test)
+                .enter()
+                .append("option")
+                .attr("class", function(d){
+                  return "langswitch "+d.lang;
+                })
+                .attr("value", function(d){
+                  return d.variable;
+                })
+                .text(function(d){ return d.label; });
 
-selecta.on('change', function() {
+
+d3.select("select#var")
+  .on('change', function() {
     update(d3.select(this).property('value'));
 });
 
@@ -178,7 +261,7 @@ function update(variable) {
   var backgrounds = svg.selectAll(".bg")
     .data(coronadata);
 
-  backgrounds.enter()
+  var b = backgrounds.enter()
     .append("path")
     .merge(backgrounds)
     .transition()
@@ -191,9 +274,10 @@ function update(variable) {
       return line(d.values);
     });
 
+  console.log(b);
+
   svg.selectAll(".bg")
-  .on("mouseenter", function(d) {
-    console.log("enter");
+    .on("mouseenter", function(d) {
       g = d.key.split(" ")[1];
       d3.select(".Münster").attr("style", "display: none");
       d3.select("." + g).attr("style", "display: block");
