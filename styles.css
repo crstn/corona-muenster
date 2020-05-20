@@ -85,3 +85,7 @@ a.selected{
   background-color: #0366d6;
   color: white;
 }
+
+a.selected:hover{
+  text-decoration: none;
+}
