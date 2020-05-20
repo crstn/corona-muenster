@@ -17,6 +17,10 @@ const variables = {
   dead: {
     DE: "Todesfälle",
     EN: "Deaths"
+  },
+  dailynew: {
+    DE: "Neue Fälle",
+    EN: "New cases"
   }
 }
 
@@ -140,6 +144,7 @@ dataset.then(function(data) {
     // handle the first one separately
     // at the first data point, the current cases are equal to the total cases
     slices[i]["values"][0].current = slices[i]["values"][0].cases;
+    slices[i]["values"][0].dailynew = slices[i]["values"][0].cases;
 
     for (var j = 1; j < slices[i]["values"].length; j++) {
       if (slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
@@ -150,7 +155,11 @@ dataset.then(function(data) {
         slices[i]["values"][j].dead = slices[i]["values"][j - 1].dead;
       }
 
+      // calculate current "active" cases
       slices[i]["values"][j].current = slices[i]["values"][j].cases - (slices[i]["values"][j].recovered + slices[i]["values"][j].dead);
+
+      // calculate new cases since the previous day
+      slices[i]["values"][j].dailynew = slices[i]["values"][j].cases - slices[i]["values"][j - 1].cases;
 
     }
   }
@@ -160,6 +169,8 @@ dataset.then(function(data) {
   })
 
   coronadata = slices;
+
+  // console.log(coronadata);
 
   // initialize scales
 
@@ -201,7 +212,13 @@ function update(variable) {
     return d3.max(c.values, function(d) {
       return d[variable];
     });
-  })])
+  })]);
+
+  console.log([(0), d3.max(coronadata, function(c) {
+    return d3.max(c.values, function(d) {
+      return d[variable];
+    });
+  })]);
 
   // update the y Axis
   svg.selectAll(".myYaxis")
@@ -236,8 +253,6 @@ function update(variable) {
     .attr("d", function(d) {
       return line(d.values);
     });
-
-  console.log(b);
 
   svg.selectAll(".bg")
     .on("mouseenter", function(d) {
