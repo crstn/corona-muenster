@@ -1,4 +1,4 @@
-const variable = "current";
+var variable = "current";
 const language = "DE"
 
 const variables = {
@@ -74,15 +74,25 @@ for (v in variables) {
 
 }
 
+// normalization toggle
+s.append("label")
+     .attr("class", "switch")
+
+swtch = d3.select("label.switch");
+
+swtch.append("input")
+     .attr("type", "checkbox")
+
+swtch.append("span")
+     .attr("class", "slider round");
+
 s.append("span")
-     .html(`
-<!-- normalization toggle -->
-<label class="switch">
-  <input type="checkbox">
-  <span class="slider round"></span>
-</label>
-<span class="norm langswitch DE">pro 100k</span>
-<span class="norm langswitch EN hidden">per 100k</span>`);
+     .attr("class", "norm langswitch DE")
+     .text("pro 100k");
+
+ s.append("span")
+      .attr("class", "norm langswitch EN hidden")
+      .text("per 100k");
 
 // highlight the first shown variable:
 d3.selectAll(".varselecta#" + variable).classed("selected", true);
