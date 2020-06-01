@@ -74,6 +74,16 @@ for (v in variables) {
 
 }
 
+s.append("span")
+     .html(`
+<!-- normalization toggle -->
+<label class="switch">
+  <input type="checkbox">
+  <span class="slider round"></span>
+</label>
+<span class="norm langswitch DE">pro 100k</span>
+<span class="norm langswitch EN hidden">per 100k</span>`);
+
 // highlight the first shown variable:
 d3.selectAll(".varselecta#" + variable).classed("selected", true);
 
@@ -240,14 +250,15 @@ dataset.then(function(data) {
 });
 
 // this is where the action is...
-function update(variable) {
+function update(newvar) {
 
-  variable = variable+"_norm";
+  // keep track of the current variable globally
+  variable = newvar;
 
   // update the domain for y scale
   yScale.domain([(0), d3.max(coronadata, function(c) {
     return d3.max(c.values, function(d) {
-      return d[variable];
+      return d[newvar];
     });
   })]);
 
@@ -265,7 +276,7 @@ function update(variable) {
       return xScale(d.date);
     })
     .y(function(d) {
-      return yScale(d[variable]);
+      return yScale(d[newvar]);
     });
 
 
@@ -335,7 +346,7 @@ function update(variable) {
     })
     .attr("transform", function(d) {
       return "translate(" + (xScale(d.values[d.values.length - 1].date) + 5) +
-        "," + (yScale(d.values[d.values.length - 1][variable]) + 5) + ")";
+        "," + (yScale(d.values[d.values.length - 1][newvar]) + 5) + ")";
     })
     //.attr("x", 5)
     .text(function(d) {
