@@ -74,26 +74,6 @@ for (v in variables) {
 
 }
 
-// normalization toggle
-s.append("label")
-     .attr("class", "switch")
-
-swtch = d3.select("label.switch");
-
-swtch.append("input")
-     .attr("type", "checkbox")
-
-swtch.append("span")
-     .attr("class", "slider round");
-
-s.append("span")
-     .attr("class", "norm langswitch DE")
-     .text("pro 100k");
-
- s.append("span")
-      .attr("class", "norm langswitch EN hidden")
-      .text("per 100k");
-
 // highlight the first shown variable:
 d3.selectAll(".varselecta#" + variable).classed("selected", true);
 
@@ -141,7 +121,7 @@ const timeConv = d3.timeParse("%d.%m.%Y");
 
 const dataset = d3.csv("https://raw.githubusercontent.com/od-ms/resources/master/coronavirus-fallzahlen-regierungsbezirk-muenster.csv",
   function(d) {
-    return {
+    return { // let's clean up those messy column names a bit:
       area: d["Gebiet"],
       date: timeConv(d["Datum"]),
       cases: +d["Bestätigte Faelle"],
@@ -159,7 +139,7 @@ dataset.then(function(data) {
     })
     .entries(data);
 
-    console.log(slices);
+  console.log(slices);
 
   // for missing data, assume the data from the previous day:
   const tf = d3.timeFormat('%d.%m.');
@@ -177,7 +157,7 @@ dataset.then(function(data) {
     // look up population number (remove kreis, stadt for that)
     a = slices[i].key.split(' ')[1];
     p = population[a];
-    normfactor = p/100000
+    normfactor = p / 100000
 
     // sort data points for this area ascendingly by date
     slices[i]["values"] = slices[i]["values"].slice().sort((a, b) => d3.ascending(a.date, b.date));
@@ -197,7 +177,7 @@ dataset.then(function(data) {
 
       // handle the first one separately
       // at the first data point, the current cases are equal to the total cases
-      if (j == 0){
+      if (j == 0) {
 
         slices[i]["values"][0].current = slices[i]["values"][0].cases;
         slices[i]["values"][0].dailynew = slices[i]["values"][0].cases;
@@ -213,7 +193,7 @@ dataset.then(function(data) {
 
       // add a version of each variable that is normalized to 100k inhabitants
       for (v in variables) {
-          slices[i]["values"][j][v+"_norm"] = slices[i]["values"][j][v] / normfactor;
+        slices[i]["values"][j][v + "_norm"] = slices[i]["values"][j][v] / normfactor;
       }
 
     }
@@ -254,8 +234,33 @@ dataset.then(function(data) {
     .call(xaxis);
 
 
-  update(variable);
+  // add the normalization toggle to the UI:
+  // normalization toggle
+  s.append("label")
+    .attr("class", "switch");
 
+  swtch = d3.select("label.switch");
+
+  swtch.append("input")
+    .attr("type", "checkbox")
+    .attr("id", "norm");
+
+    d3.select("#norm").on("change", function(){
+      update(variable)}
+    );
+
+  swtch.append("span")
+    .attr("class", "slider round");
+
+  s.append("span")
+    .attr("class", "norm langswitch DE")
+    .text("pro 100k");
+
+  s.append("span")
+    .attr("class", "norm langswitch EN hidden")
+    .text("per 100k");
+
+  update(variable);
 
 });
 
@@ -264,6 +269,11 @@ function update(newvar) {
 
   // keep track of the current variable globally
   variable = newvar;
+
+  // check the normalization toggle:
+  if (d3.select('#norm').property('checked')) {
+    newvar = newvar+"_norm";
+  }
 
   // update the domain for y scale
   yScale.domain([(0), d3.max(coronadata, function(c) {
@@ -306,8 +316,8 @@ function update(newvar) {
       return line(d.values);
     });
 
-    svg.selectAll(".bg")
-      .on("mouseenter", function(d) {
+  svg.selectAll(".bg")
+    .on("mouseenter", function(d) {
       g = d.key.split(" ")[1];
       d3.select(".Münster").attr("style", "display: none");
       d3.select("." + g).attr("style", "display: block");
