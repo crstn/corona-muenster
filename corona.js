@@ -19,8 +19,12 @@ const variables = {
     EN: "Deaths"
   },
   dailynew: {
-    DE: "Neue Fälle",
-    EN: "New cases"
+    DE: "Neue Fälle/Tag",
+    EN: "Daily new cases"
+  },
+  weeklynew: {
+    DE: "Neue Fälle/Woche",
+    EN: "Weekly new cases"
   }
 }
 
@@ -164,6 +168,33 @@ dataset.then(function(data) {
 
     for (var j = 0; j < slices[i]["values"].length; j++) {
 
+      // weekly new cases are a bit tricky for the start:
+      switch (j) {
+        case 0:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases;
+          break;
+        case 1:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 1].cases
+          break;
+        case 2:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 2].cases
+          break;
+        case 3:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 3].cases
+          break;
+        case 4:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 4].cases
+          break;
+        case 5:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 5].cases
+          break;
+        case 6:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 6].cases
+          break;
+        default:
+          slices[i]["values"][j].weeklynew = slices[i]["values"][j].cases - slices[i]["values"][j - 7].cases
+      }
+
       if (j > 0 && slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
         slices[i]["values"][j].recovered = slices[i]["values"][j - 1].recovered;
       }
@@ -245,9 +276,9 @@ dataset.then(function(data) {
     .attr("type", "checkbox")
     .attr("id", "norm");
 
-    d3.select("#norm").on("change", function(){
-      update(variable)}
-    );
+  d3.select("#norm").on("change", function() {
+    update(variable)
+  });
 
   swtch.append("span")
     .attr("class", "slider round");
@@ -272,7 +303,7 @@ function update(newvar) {
 
   // check the normalization toggle:
   if (d3.select('#norm').property('checked')) {
-    newvar = newvar+"_norm";
+    newvar = newvar + "_norm";
   }
 
   // update the domain for y scale
