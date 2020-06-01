@@ -24,6 +24,18 @@ const variables = {
   }
 }
 
+// population numbers for normailzation from https://www.bezreg-muenster.de/de/wir_ueber_uns/regierungsbezirk/index.html
+const population = {
+  Bottrop: 116005,
+  Gelsenkirchen: 258429,
+  Münster: 299646,
+  Borken: 364390,
+  Coesfeld: 215525,
+  Recklinghausen: 613425,
+  Steinfurt: 435119,
+  Warendorf: 273050
+}
+
 // add language selection
 d3.selectAll(".langselecta")
   .on("click", function() {
@@ -125,6 +137,8 @@ dataset.then(function(data) {
     })
     .entries(data);
 
+    console.log(slices);
+
   // for missing data, assume the data from the previous day:
   const tf = d3.timeFormat('%d.%m.');
 
@@ -138,28 +152,55 @@ dataset.then(function(data) {
   // loop through areas
   for (i in slices) {
 
+    // look up population number (remove kreis, stadt for that)
+    a = slices[i].key.split(' ')[1];
+    p = population[a];
+    normfactor = p/100000
+
     // sort data points for this area ascendingly by date
     slices[i]["values"] = slices[i]["values"].slice().sort((a, b) => d3.ascending(a.date, b.date));
 
-    // handle the first one separately
-    // at the first data point, the current cases are equal to the total cases
-    slices[i]["values"][0].current = slices[i]["values"][0].cases;
-    slices[i]["values"][0].dailynew = slices[i]["values"][0].cases;
+    for (var j = 0; j < slices[i]["values"].length; j++) {
 
-    for (var j = 1; j < slices[i]["values"].length; j++) {
-      if (slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
+      // normalize case count
+      slices[i]["values"][j].cases_norm = slices[i]["values"][j].cases / normfactor;
+
+      if (j > 0 && slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
         slices[i]["values"][j].recovered = slices[i]["values"][j - 1].recovered;
       }
 
-      if (slices[i]["values"][j].dead == 0 && slices[i]["values"][j - 1].dead > 0) {
+      // normalize per 100k inhabitants
+      slices[i]["values"][j].recovered_norm = slices[i]["values"][j].recovered / normfactor;
+
+      if (j > 0 && slices[i]["values"][j].dead == 0 && slices[i]["values"][j - 1].dead > 0) {
         slices[i]["values"][j].dead = slices[i]["values"][j - 1].dead;
       }
 
-      // calculate current "active" cases
-      slices[i]["values"][j].current = slices[i]["values"][j].cases - (slices[i]["values"][j].recovered + slices[i]["values"][j].dead);
+      // normalize per 100k inhabitants
+      slices[i]["values"][j].dead_norm = slices[i]["values"][j].dead / normfactor;
 
-      // calculate new cases since the previous day
-      slices[i]["values"][j].dailynew = slices[i]["values"][j].cases - slices[i]["values"][j - 1].cases;
+      // calculate current "active" and daily new cases
+
+      // handle the first one separately
+      // at the first data point, the current cases are equal to the total cases
+      if (j == 0){
+
+        slices[i]["values"][0].current = slices[i]["values"][0].cases;
+        slices[i]["values"][0].dailynew = slices[i]["values"][0].cases;
+
+      } else {
+
+        slices[i]["values"][j].current = slices[i]["values"][j].cases - (slices[i]["values"][j].recovered + slices[i]["values"][j].dead);
+
+        slices[i]["values"][j].dailynew = slices[i]["values"][j].cases - slices[i]["values"][j - 1].cases;
+
+      }
+
+
+      // normalize per 100k inhabitants
+      slices[i]["values"][j].current_norm = slices[i]["values"][j].current / normfactor;
+
+      slices[i]["values"][j].dailynew_norm = slices[i]["values"][j].dailynew / normfactor;
 
     }
   }
@@ -170,7 +211,7 @@ dataset.then(function(data) {
 
   coronadata = slices;
 
-  // console.log(coronadata);
+  console.log(coronadata);
 
   // initialize scales
 
@@ -207,14 +248,10 @@ dataset.then(function(data) {
 // this is where the action is...
 function update(variable) {
 
+  variable = variable+"_norm";
+
   // update the domain for y scale
   yScale.domain([(0), d3.max(coronadata, function(c) {
-    return d3.max(c.values, function(d) {
-      return d[variable];
-    });
-  })]);
-
-  console.log([(0), d3.max(coronadata, function(c) {
     return d3.max(c.values, function(d) {
       return d[variable];
     });
@@ -254,8 +291,8 @@ function update(variable) {
       return line(d.values);
     });
 
-  svg.selectAll(".bg")
-    .on("mouseenter", function(d) {
+    svg.selectAll(".bg")
+      .on("mouseenter", function(d) {
       g = d.key.split(" ")[1];
       d3.select(".Münster").attr("style", "display: none");
       d3.select("." + g).attr("style", "display: block");
