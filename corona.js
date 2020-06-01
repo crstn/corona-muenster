@@ -24,6 +24,8 @@ const variables = {
   }
 }
 
+
+
 // population numbers for normailzation from https://www.bezreg-muenster.de/de/wir_ueber_uns/regierungsbezirk/index.html
 const population = {
   Bottrop: 116005,
@@ -162,22 +164,14 @@ dataset.then(function(data) {
 
     for (var j = 0; j < slices[i]["values"].length; j++) {
 
-      // normalize case count
-      slices[i]["values"][j].cases_norm = slices[i]["values"][j].cases / normfactor;
-
       if (j > 0 && slices[i]["values"][j].recovered == 0 && slices[i]["values"][j - 1].recovered > 0) {
         slices[i]["values"][j].recovered = slices[i]["values"][j - 1].recovered;
       }
 
       // normalize per 100k inhabitants
-      slices[i]["values"][j].recovered_norm = slices[i]["values"][j].recovered / normfactor;
-
       if (j > 0 && slices[i]["values"][j].dead == 0 && slices[i]["values"][j - 1].dead > 0) {
         slices[i]["values"][j].dead = slices[i]["values"][j - 1].dead;
       }
-
-      // normalize per 100k inhabitants
-      slices[i]["values"][j].dead_norm = slices[i]["values"][j].dead / normfactor;
 
       // calculate current "active" and daily new cases
 
@@ -197,10 +191,10 @@ dataset.then(function(data) {
       }
 
 
-      // normalize per 100k inhabitants
-      slices[i]["values"][j].current_norm = slices[i]["values"][j].current / normfactor;
-
-      slices[i]["values"][j].dailynew_norm = slices[i]["values"][j].dailynew / normfactor;
+      // add a version of each variable that is normalized to 100k inhabitants
+      for (v in variables) {
+          slices[i]["values"][j][v+"_norm"] = slices[i]["values"][j][v] / normfactor;
+      }
 
     }
   }
