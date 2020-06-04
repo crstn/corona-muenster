@@ -448,28 +448,28 @@ console.log(mi, mx)
     .selectAll("path")
     .data(topojson.feature(mapdata, mapdata.objects.bezirk).features);
 
-  bezs.enter()
-    .append("path")
-    .merge(bezs)
-    .transition()
-    .duration(transitiontime)
-    .attr("class", "area_map")
-    .attr("fill", function(d) {
-      a = d.properties.GEN;
-      // find the data for this area. Not very elegent...
-      for (i in coronadata){
-        // find the correct area
-        if(a == coronadata[i].key.split(" ")[1]){
-          // get the latest value for the current area:
-          var vals = coronadata[i].values
-          latestvalue = vals[vals.length-1][newvar]
-          console.log(latestvalue)
-          return color(latestvalue);
-        };
-      }
-
-    })
-    .attr("d", mappath);
+  // bezs.enter()
+  //   .append("path")
+  //   .merge(bezs)
+  //   .transition()
+  //   .duration(transitiontime)
+  //   .attr("class", "area_map")
+  //   .attr("fill", function(d) {
+  //     a = d.properties.GEN;
+  //     // find the data for this area. Not very elegent...
+  //     for (i in coronadata){
+  //       // find the correct area
+  //       if(a == coronadata[i].key.split(" ")[1]){
+  //         // get the latest value for the current area:
+  //         var vals = coronadata[i].values
+  //         latestvalue = vals[vals.length-1][newvar]
+  //         console.log(latestvalue)
+  //         return color(latestvalue);
+  //       };
+  //     }
+  //
+  //   })
+  //   .attr("d", mappath);
 
 
   // set the transition time to one second after the inital run
