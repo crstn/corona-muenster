@@ -150,18 +150,9 @@ Promise.all([mapdata, dataset]).then(function(values) {
   data = values[1];
   mapdata = values[0];
 
-  console.log(mapdata.objects.bezirk);
-
-  console.log(svg);
   // draw map
   svg.append("g")
-     .attr("class", "bezirke")
-     .selectAll("path")
-     .data(topojson.feature(mapdata, mapdata.objects.bezirk).features)
-     .enter()
-     .append("path")
-     .attr("class", "bezirkmap")
-     .attr("d", mappath);
+     .attr("id", "bezirkemap");
 
 
   // turn the tabular into hierarchical data, organized by area
@@ -174,7 +165,7 @@ Promise.all([mapdata, dataset]).then(function(values) {
   // for missing data, assume the data from the previous day:
   const tf = d3.timeFormat('%d.%m.');
 
-  // next, we'll sort the data b time stamp in ascending order
+  // next, we'll sort the data by time stamp in ascending order
   // and add data about recovered and dead to the days where this
   // data is missing, assuming the number has not changed since the
   // previous day.
@@ -254,6 +245,7 @@ Promise.all([mapdata, dataset]).then(function(values) {
       }
 
     }
+
   }
 
   dateextent = d3.extent(data, function(d) {
@@ -261,6 +253,11 @@ Promise.all([mapdata, dataset]).then(function(values) {
   })
 
   coronadata = slices;
+
+  console.log(coronadata);
+
+
+
 
   // initialize scales
 
@@ -330,12 +327,29 @@ function update(newvar) {
     newvar = newvar + "_norm";
   }
 
-  // update the domain for y scale
+  // update the domain for y scale -  here we
+  // need the max from ALL values over time
   yScale.domain([(0), d3.max(coronadata, function(c) {
     return d3.max(c.values, function(d) {
       return d[newvar];
     });
   })]);
+
+  // create a color scale for the map.
+  // Here we need the max from the latest day!
+  var mi = d3.min(coronadata, function(c) {
+    return c.values[c.values.length-1][newvar];
+  });
+
+  var mx = d3.max(coronadata, function(c) {
+    return c.values[c.values.length-1][newvar];
+  });
+
+console.log(mi, mx)
+
+  var color = d3.scaleOrdinal()
+    .domain([mi, mx])
+    .range(d3.schemeBlues[9]);
 
   // update the y Axis
   svg.selectAll(".myYaxis")
@@ -358,7 +372,7 @@ function update(newvar) {
   var backgrounds = svg.selectAll(".bg")
     .data(coronadata);
 
-  var b = backgrounds.enter()
+  backgrounds.enter()
     .append("path")
     .merge(backgrounds)
     .transition()
@@ -428,7 +442,37 @@ function update(newvar) {
       return d.key;
     });
 
+  // next, update the map:
+
+  var bezs = d3.select("g#bezirkemap")
+    .selectAll("path")
+    .data(topojson.feature(mapdata, mapdata.objects.bezirk).features);
+
+  bezs.enter()
+    .append("path")
+    .merge(bezs)
+    .transition()
+    .duration(transitiontime)
+    .attr("class", "area_map")
+    .attr("fill", function(d) {
+      a = d.properties.GEN;
+      // find the data for this area. Not very elegent...
+      for (i in coronadata){
+        // find the correct area
+        if(a == coronadata[i].key.split(" ")[1]){
+          // get the latest value for the current area:
+          var vals = coronadata[i].values
+          latestvalue = vals[vals.length-1][newvar]
+          console.log(latestvalue)
+          return color(latestvalue);
+        };
+      }
+
+    })
+    .attr("d", mappath);
+
+
   // set the transition time to one second after the inital run
-  transitiontime = 1000
+  transitiontime = 1000;
 
 }

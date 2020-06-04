@@ -94,23 +94,22 @@ span.norm{
 }
 
 /* LINE CHART */
-path {
-  fill: none;
-  stroke: #ed3700;
-}
 
 path.ms {
+  fill: none;
   stroke: #ed3700;
   stroke-width: 2;
 }
 
 path.bg {
+  fill: none;
   stroke: lightgrey;
   stroke-opacity: 0.0;
   stroke-width: 10;
 }
 
 path.andere {
+  fill: none;
   stroke: #2b2929;
   stroke-dasharray: 2;
 }
