@@ -120,6 +120,17 @@ const svg = d3.select("div#container").append("svg")
   .style("margin", margin)
   .classed("svg-content", true);
 
+
+// map projection and path generator
+var mapprojection = d3.geoMercator()
+  .translate([width / 10, height / 5])
+  .scale(6000)
+  .center([7, 52]);
+
+var mappath = d3.geoPath().projection(mapprojection);
+
+var mapdata = d3.json("bezirk_topo.json");
+
 //-----------------------------DATA------------------------------//
 const timeConv = d3.timeParse("%d.%m.%Y");
 
@@ -134,7 +145,24 @@ const dataset = d3.csv("https://raw.githubusercontent.com/od-ms/resources/master
     };
   });
 
-dataset.then(function(data) {
+Promise.all([mapdata, dataset]).then(function(values) {
+
+  data = values[1];
+  mapdata = values[0];
+
+  console.log(mapdata.objects.bezirk);
+
+  console.log(svg);
+  // draw map
+  svg.append("g")
+     .attr("class", "bezirke")
+     .selectAll("path")
+     .data(topojson.feature(mapdata, mapdata.objects.bezirk).features)
+     .enter()
+     .append("path")
+     .attr("class", "bezirkmap")
+     .attr("d", mappath);
+
 
   // turn the tabular into hierarchical data, organized by area
   const slices = d3.nest()
@@ -142,8 +170,6 @@ dataset.then(function(data) {
       return d["area"];
     })
     .entries(data);
-
-  console.log(slices);
 
   // for missing data, assume the data from the previous day:
   const tf = d3.timeFormat('%d.%m.');
@@ -235,8 +261,6 @@ dataset.then(function(data) {
   })
 
   coronadata = slices;
-
-  console.log(coronadata);
 
   // initialize scales
 
