@@ -95,6 +95,11 @@ span.norm{
 
 /* LINE CHART */
 
+path.area_map{
+  stroke: white;
+  stroke-width: 0.7;
+}
+
 path.ms {
   fill: none;
   stroke: #ed3700;
